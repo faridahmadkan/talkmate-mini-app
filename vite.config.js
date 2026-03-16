@@ -6,18 +6,15 @@ export default defineConfig({
   base: '/talkmate-mini-app/',
   build: {
     outDir: 'dist',
-    assetsDir: 'assets',
+    assetsDir: '.',
+    emptyOutDir: true,
     sourcemap: false,
     minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: true,
-        drop_debugger: true
-      }
-    },
     rollupOptions: {
       output: {
-        manualChunks: undefined
+        entryFileNames: 'assets/[name].[hash].js',
+        chunkFileNames: 'assets/[name].[hash].js',
+        assetFileNames: 'assets/[name].[hash].[ext]'
       }
     }
   },

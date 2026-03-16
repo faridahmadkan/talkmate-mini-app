@@ -21,6 +21,7 @@ export const fetchUserData = async (userId) => {
     // Return mock data as fallback
     return {
       profile: {
+        firstName: 'User',
         messageCount: Math.floor(Math.random() * 100) + 10,
         joined: new Date().toISOString()
       },
