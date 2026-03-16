@@ -21,7 +21,7 @@ function Profile({ user, addNotification }) {
 
   const handleShare = () => {
     tg?.HapticFeedback?.impactOccurred('medium')
-    const botUsername = 'YOUR_BOT_USERNAME' // Replace with your bot username
+    const botUsername = 'TalkMatebot' // Replace with your bot username
     tg?.openTelegramLink(`https://t.me/${botUsername}`)
     addNotification?.('Bot link copied to clipboard')
   }
