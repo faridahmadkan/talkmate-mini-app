@@ -21,9 +21,12 @@ function Profile({ user, addNotification }) {
 
   const handleShare = () => {
     tg?.HapticFeedback?.impactOccurred('medium')
-    const botUsername = 'TalkMatebot' // Replace with your bot username
-    tg?.openTelegramLink(`https://t.me/${botUsername}`)
-    addNotification?.('Bot link copied to clipboard')
+    const botUsername = 'TalkMatebot' // ✅ Your correct bot username
+    const shareText = encodeURIComponent('🤖 Check out TalkMate Ultimate - the world\'s most powerful free Telegram bot!')
+    const shareUrl = `https://t.me/share/url?url=https://t.me/${botUsername}&text=${shareText}`
+    
+    tg?.openTelegramLink(shareUrl)
+    addNotification?.('Share dialog opened!')
   }
 
   const handleContact = () => {
@@ -129,6 +132,7 @@ function Profile({ user, addNotification }) {
       {/* Favorites Section */}
       {activeSection === 'favorites' && (
         <div className="favorites-section">
+          <h4>⭐ Your Favorites</h4>
           {userData?.favorites && userData.favorites.length > 0 ? (
             userData.favorites.map((fav, i) => (
               <div key={i} className="favorite-item">
