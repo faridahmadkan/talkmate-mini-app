@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import axios from 'axios'
 
-function Weather({ user }) {
+function Weather({ user, addNotification }) {
   const [city, setCity] = useState('')
   const [weather, setWeather] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -29,18 +29,21 @@ function Weather({ user }) {
       
       const data = response.data.trim().split(' ')
       if (data.length >= 6) {
-        setWeather({
+        const weatherData = {
+          city: city,
           condition: data[0],
           temp: data[1].replace('+', '').replace('°C', ''),
           humidity: data[2].replace('%', ''),
           wind: data[3].replace('km/h', ''),
           rain: data[4],
           pressure: data[5].replace('hPa', '')
-        })
+        }
+        setWeather(weatherData)
+        addNotification?.(`Weather for ${city}: ${weatherData.temp}°C, ${weatherData.condition}`)
 
-        // Get 3-day forecast
+        // Get 5-day forecast
         const forecastRes = await axios.get(
-          `https://wttr.in/${encodeURIComponent(city)}?format=%c+%t&m&days=3`,
+          `https://wttr.in/${encodeURIComponent(city)}?format=%c+%t&m&days=5`,
           { timeout: 10000 }
         )
         
@@ -58,7 +61,6 @@ function Weather({ user }) {
       }
     } catch (error) {
       setError('Weather service unavailable. Please try again.')
-      console.error('Weather error:', error)
     } finally {
       setLoading(false)
     }
@@ -66,6 +68,7 @@ function Weather({ user }) {
 
   return (
     <div className="weather-container">
+      <h2 className="section-title">🌤️ Weather Service</h2>
       <input
         type="text"
         className="input"
@@ -84,55 +87,49 @@ function Weather({ user }) {
       </button>
 
       {error && (
-        <div className="card" style={{ background: '#ffebee', color: '#c62828' }}>
+        <div className="error-message">
           {error}
         </div>
       )}
 
       {weather && (
-        <div className="card">
-          <h3 className="card-title">📍 {city}</h3>
+        <div className="weather-card">
+          <h3>📍 {city}</h3>
+          <div className="weather-main">
+            <div className="weather-temp">{weather.temp}°C</div>
+            <div className="weather-condition">{weather.condition}</div>
+          </div>
           
-          <div className="grid-2">
-            <div className="weather-detail">
-              <div style={{ fontSize: '14px', opacity: 0.7 }}>Condition</div>
-              <div style={{ fontSize: '18px', fontWeight: 'bold' }}>{weather.condition}</div>
+          <div className="weather-details">
+            <div className="detail-item">
+              <span className="detail-label">💧 Humidity</span>
+              <span className="detail-value">{weather.humidity}%</span>
             </div>
-            <div className="weather-detail">
-              <div style={{ fontSize: '14px', opacity: 0.7 }}>Temperature</div>
-              <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#667eea' }}>
-                {weather.temp}°C
-              </div>
+            <div className="detail-item">
+              <span className="detail-label">💨 Wind</span>
+              <span className="detail-value">{weather.wind} km/h</span>
             </div>
-            <div className="weather-detail">
-              <div style={{ fontSize: '14px', opacity: 0.7 }}>💧 Humidity</div>
-              <div style={{ fontSize: '18px' }}>{weather.humidity}%</div>
+            <div className="detail-item">
+              <span className="detail-label">📊 Pressure</span>
+              <span className="detail-value">{weather.pressure} hPa</span>
             </div>
-            <div className="weather-detail">
-              <div style={{ fontSize: '14px', opacity: 0.7 }}>💨 Wind</div>
-              <div style={{ fontSize: '18px' }}>{weather.wind} km/h</div>
-            </div>
-            <div className="weather-detail">
-              <div style={{ fontSize: '14px', opacity: 0.7 }}>📊 Pressure</div>
-              <div style={{ fontSize: '18px' }}>{weather.pressure} hPa</div>
-            </div>
-            <div className="weather-detail">
-              <div style={{ fontSize: '14px', opacity: 0.7 }}>🌧️ Rain</div>
-              <div style={{ fontSize: '18px' }}>{weather.rain}</div>
+            <div className="detail-item">
+              <span className="detail-label">🌧️ Rain</span>
+              <span className="detail-value">{weather.rain}</span>
             </div>
           </div>
         </div>
       )}
 
       {forecast.length > 0 && (
-        <div className="card">
-          <h3 className="card-title">📅 3-Day Forecast</h3>
-          <div className="grid-3">
+        <div className="forecast-card">
+          <h3>📅 5-Day Forecast</h3>
+          <div className="forecast-grid">
             {forecast.map((day, i) => (
-              <div key={i} className="weather-detail" style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '14px', opacity: 0.7 }}>Day {i + 1}</div>
-                <div style={{ fontSize: '20px' }}>{day.condition}</div>
-                <div style={{ fontSize: '16px', fontWeight: 'bold' }}>{day.temp}°C</div>
+              <div key={i} className="forecast-day">
+                <div className="forecast-day-name">Day {i + 1}</div>
+                <div className="forecast-condition">{day.condition}</div>
+                <div className="forecast-temp">{day.temp}°C</div>
               </div>
             ))}
           </div>

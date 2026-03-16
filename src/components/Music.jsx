@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 
-function Music({ user }) {
+function Music({ user, addNotification }) {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState([])
   const [loading, setLoading] = useState(false)
@@ -63,6 +63,7 @@ function Music({ user }) {
 
     setTimeout(() => {
       setResults(mockResults)
+      addNotification?.(`Found ${mockResults.length} results for "${query}"`)
       setLoading(false)
     }, 1000)
   }
@@ -75,6 +76,7 @@ function Music({ user }) {
     window.open(track.downloadUrl, '_blank')
     
     tg?.showAlert(`Downloading: ${track.title}\n\nThe file is downloading in your browser.`)
+    addNotification?.(`Downloaded: ${track.title}`)
     
     setTimeout(() => {
       setDownloading(null)
@@ -83,6 +85,7 @@ function Music({ user }) {
 
   return (
     <div className="music-container">
+      <h2 className="section-title">🎵 Music Service</h2>
       <input
         type="text"
         className="input"
@@ -101,27 +104,24 @@ function Music({ user }) {
       </button>
 
       {results.length > 0 && (
-        <div style={{ marginTop: '20px' }}>
-          <h3 className="card-title">Results for "{query}"</h3>
+        <div className="results-section">
+          <h3>Results for "{query}"</h3>
           {results.map(track => (
-            <div key={track.id} className="card" style={{ padding: '15px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                  <div style={{ fontWeight: 'bold' }}>{track.title}</div>
-                  <div style={{ fontSize: '14px', opacity: 0.7 }}>{track.artist}</div>
-                  <div style={{ fontSize: '12px', opacity: 0.6, marginTop: '5px' }}>
-                    ⏱️ {track.duration} • 📦 {track.size}
-                  </div>
+            <div key={track.id} className="music-card">
+              <div className="music-info">
+                <div className="music-title">{track.title}</div>
+                <div className="music-artist">{track.artist}</div>
+                <div className="music-meta">
+                  ⏱️ {track.duration} • 📦 {track.size}
                 </div>
-                <button
-                  className="button"
-                  style={{ width: 'auto', padding: '10px 20px', margin: 0 }}
-                  onClick={() => handleDownload(track)}
-                  disabled={downloading === track.id}
-                >
-                  {downloading === track.id ? '...' : '📥'}
-                </button>
               </div>
+              <button
+                className="download-button"
+                onClick={() => handleDownload(track)}
+                disabled={downloading === track.id}
+              >
+                {downloading === track.id ? '...' : '📥'}
+              </button>
             </div>
           ))}
         </div>

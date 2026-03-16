@@ -6,11 +6,13 @@ import Music from './components/Music'
 import News from './components/News'
 import Profile from './components/Profile'
 import { getTelegramUser } from './api'
+import './App.css'
 
 function App() {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
   const [theme, setTheme] = useState('light')
+  const [notifications, setNotifications] = useState([])
 
   useEffect(() => {
     // Initialize Telegram Web App
@@ -31,31 +33,26 @@ function App() {
       tg.onEvent('themeChanged', () => {
         setTheme(tg.colorScheme)
       })
+      
+      // Show welcome notification
+      addNotification(`Welcome ${tgUser?.first_name || 'User'}!`)
     }
     setLoading(false)
   }, [])
 
+  const addNotification = (message) => {
+    const id = Date.now()
+    setNotifications(prev => [...prev, { id, message }])
+    setTimeout(() => {
+      setNotifications(prev => prev.filter(n => n.id !== id))
+    }, 3000)
+  }
+
   if (loading) {
     return (
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        height: '100vh',
-        background: 'var(--tg-theme-bg-color)'
-      }}>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{
-            width: '50px',
-            height: '50px',
-            border: '4px solid #f3f3f3',
-            borderTop: '4px solid #667eea',
-            borderRadius: '50%',
-            animation: 'spin 1s linear infinite',
-            margin: '20px auto'
-          }}></div>
-          <p>Loading TalkMate...</p>
-        </div>
+      <div className="loading-screen">
+        <div className="spinner"></div>
+        <p>Loading TalkMate Ultimate...</p>
       </div>
     )
   }
@@ -63,21 +60,33 @@ function App() {
   return (
     <Router basename="/talkmate-mini-app">
       <div className={`app ${theme}`}>
+        {/* Notifications */}
+        <div className="notification-container">
+          {notifications.map(notif => (
+            <div key={notif.id} className="notification">
+              {notif.message}
+            </div>
+          ))}
+        </div>
+
+        {/* Header */}
         <header className="app-header">
           <h1>TalkMate Ultimate</h1>
           {user && <p className="welcome">Welcome, {user.first_name}!</p>}
         </header>
         
+        {/* Main Content */}
         <main className="app-main">
           <Routes>
             <Route path="/" element={<Navigate to="/weather" replace />} />
-            <Route path="/weather" element={<Weather user={user} />} />
-            <Route path="/music" element={<Music user={user} />} />
-            <Route path="/news" element={<News />} />
-            <Route path="/profile" element={<Profile user={user} />} />
+            <Route path="/weather" element={<Weather user={user} addNotification={addNotification} />} />
+            <Route path="/music" element={<Music user={user} addNotification={addNotification} />} />
+            <Route path="/news" element={<News addNotification={addNotification} />} />
+            <Route path="/profile" element={<Profile user={user} addNotification={addNotification} />} />
           </Routes>
         </main>
         
+        {/* Bottom Navigation */}
         <Navigation />
       </div>
     </Router>
